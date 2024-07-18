@@ -1,5 +1,6 @@
-import DashboardFeature from '@/components/dashboard/dashboard-feature';
+import supabase from '@/app/db/supabaseClient';
 
 export default function Page() {
-  return <DashboardFeature />;
+  console.log(supabase);
+  return <h1>hello</h1>;
 }
