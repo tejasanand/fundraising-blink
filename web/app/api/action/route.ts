@@ -56,9 +56,38 @@ export async function POST(request: Request) {
     message: 'hello ' + userPubkey,
   };
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('notes')
-    .insert({ id: 5, title: userPubkey });
+    .select('id')
+    .order('id', { ascending: true })
+    .limit(1);
+
+  if (error) {
+    console.error('Error fetching last entry:', error);
+    return new Response(
+      JSON.stringify({ error: 'Error fetching last entry' }),
+      { status: 500 }
+    );
+  }
+
+  let newId;
+  if (data && data.length > 0) {
+    const lastId = data[0].id;
+    newId = lastId + 1;
+  } else {
+    newId = 1;
+  }
+
+  const { data: insertData, error: insertError } = await supabase
+    .from('notes')
+    .insert([{ id: newId, title: userPubkey }]);
+
+  if (insertError) {
+    console.error('Error inserting new row:', insertError);
+    return new Response(JSON.stringify({ error: 'Error inserting new row' }), {
+      status: 500,
+    });
+  }
 
   return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
 }
