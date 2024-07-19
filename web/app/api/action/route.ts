@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
   const { error } = await supabase
     .from('notes')
-    .insert({ id: 4, title: 'Denmark' });
+    .insert({ id: 5, title: userPubkey });
 
   return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
 }
