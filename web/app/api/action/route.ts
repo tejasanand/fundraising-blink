@@ -18,80 +18,29 @@ export async function GET(request: Request) {
     icon: 'https://i.ibb.co/swzXkcM/solana.webp',
     description: 'My blink',
     title: 'Blink',
-    label: 'Click me',
+    label: 'Stake SOL',
     error: {
       message: 'This blink is not implemented yet!',
+    },
+
+    links: {
+      actions: [
+        {
+          label: 'Donate', // button text
+          href: '/api/action/donate?amount={amount}', // or /api/donate?amount={amount}
+          parameters: [
+            // {amount} input field
+            {
+              name: 'amount', // input field name
+              label: 'SOL amount', // text input placeholder
+            },
+          ],
+        },
+      ],
     },
   };
 
   return Response.json(responseBody, {
     headers: ACTIONS_CORS_HEADERS,
   });
-}
-
-export async function POST(request: Request) {
-  const requestBody: ActionPostRequest = await request.json();
-  const userPubkey = requestBody.account;
-  console.log(userPubkey);
-  const user = new PublicKey(userPubkey);
-  const connection = new Connection(clusterApiUrl('devnet'));
-  // const ix = SystemProgram.transfer({
-  //   fromPubkey: userPubkey,
-  //   toPubkey: new PublicKey("some address"),
-  //   lamports: 1,
-  // });
-  const tx = new Transaction();
-  tx.feePayer = new PublicKey(userPubkey);
-  tx.recentBlockhash = (
-    await connection.getLatestBlockhash({
-      commitment: 'finalized',
-    })
-  ).blockhash;
-
-  const serialTX = tx
-    .serialize({ requireAllSignatures: false, verifySignatures: false })
-    .toString('base64');
-  const response: ActionPostResponse = {
-    transaction: serialTX,
-    message: 'hello ' + userPubkey,
-  };
-
-  const { data, error } = await supabase
-    .from('notes')
-    .select('id')
-    .order('id', { ascending: true })
-    .limit(1);
-
-  if (error) {
-    console.error('Error fetching last entry:', error);
-    return new Response(
-      JSON.stringify({ error: 'Error fetching last entry' }),
-      { status: 500 }
-    );
-  }
-
-  let newId;
-  if (data && data.length > 0) {
-    const lastId = data[0].id;
-    newId = lastId + 1;
-  } else {
-    newId = 1;
-  }
-
-  const { data: insertData, error: insertError } = await supabase
-    .from('notes')
-    .insert([{ id: newId, title: userPubkey }]);
-
-  if (insertError) {
-    console.error('Error inserting new row:', insertError);
-    return new Response(JSON.stringify({ error: 'Error inserting new row' }), {
-      status: 500,
-    });
-  }
-
-  return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
-}
-
-export async function OPTIONS(request: Request) {
-  return new Response(null, { headers: ACTIONS_CORS_HEADERS });
 }
