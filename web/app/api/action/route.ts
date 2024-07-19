@@ -5,12 +5,15 @@ import {
   ACTIONS_CORS_HEADERS,
 } from '@solana/actions';
 import { clusterApiUrl, SystemProgram, Connection } from '@solana/web3.js';
+import supabase from '@/app/db/supabaseClient';
 
 import { PublicKey } from '@solana/web3.js';
 
 import { Transaction } from '@solana/web3.js';
 
 export async function GET(request: Request) {
+  const { data: notes, error } = await supabase.from('notes').select('*');
+  console.log(notes);
   const responseBody: ActionGetResponse = {
     icon: 'https://i.ibb.co/swzXkcM/solana.webp',
     description: 'My blink',
@@ -20,6 +23,7 @@ export async function GET(request: Request) {
       message: 'This blink is not implemented yet!',
     },
   };
+
   return Response.json(responseBody, {
     headers: ACTIONS_CORS_HEADERS,
   });
@@ -51,6 +55,10 @@ export async function POST(request: Request) {
     transaction: serialTX,
     message: 'hello ' + userPubkey,
   };
+
+  const { error } = await supabase
+    .from('notes')
+    .insert({ id: 4, title: 'Denmark' });
 
   return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
 }
