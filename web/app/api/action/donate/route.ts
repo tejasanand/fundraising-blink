@@ -13,13 +13,20 @@ import { Transaction } from '@solana/web3.js';
 
 export async function POST(request: Request) {
   const requestBody: ActionPostRequest = await request.json();
+  const url = new URL(request.url);
+  const txAmount = url.searchParams.get('amount');
   const userPubkey = requestBody.account;
+
   console.log(userPubkey);
+
+  console.log(txAmount);
+
+  console.log();
   const user = new PublicKey(userPubkey);
-  const connection = new Connection(clusterApiUrl('devnet'));
+  const connection = new Connection(clusterApiUrl('mainnet-beta'));
   const ix = SystemProgram.transfer({
     fromPubkey: user,
-    toPubkey: new PublicKey('FgiRZff6Xu3KEbrzY23XkharPQ6La9fxqyuCMZPbVs5E'),
+    toPubkey: new PublicKey('Gfnt56Lqjm8fepkJzsRKv493J9qC8cQwaDiYNM26tHd6'),
     lamports: 1,
   });
   const tx = new Transaction();
@@ -53,25 +60,6 @@ export async function POST(request: Request) {
       JSON.stringify({ error: 'Error fetching last entry' }),
       { status: 500 }
     );
-  }
-
-  let newId;
-  if (data && data.length > 0) {
-    const lastId = data[0].id;
-    newId = lastId + 1;
-  } else {
-    newId = 1;
-  }
-
-  const { data: insertData, error: insertError } = await supabase
-    .from('notes')
-    .insert([{ id: newId, title: userPubkey }]);
-
-  if (insertError) {
-    console.error('Error inserting new row:', insertError);
-    return new Response(JSON.stringify({ error: 'Error inserting new row' }), {
-      status: 500,
-    });
   }
 
   return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
