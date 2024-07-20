@@ -23,12 +23,15 @@ export async function POST(request: Request) {
     lamports: 1,
   });
   const tx = new Transaction();
-  tx.feePayer = new PublicKey(userPubkey);
-  tx.recentBlockhash = (
+  tx.add(ix);
+  tx.feePayer = user;
+  const bh = (
     await connection.getLatestBlockhash({
       commitment: 'finalized',
     })
   ).blockhash;
+
+  tx.recentBlockhash = bh;
 
   const serialTX = tx
     .serialize({ requireAllSignatures: false, verifySignatures: false })
