@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   console.log('Request Body:', requestBody);
   const txAmount = url.searchParams.get('amount');
   const userPubkey = requestBody.account;
-  const displayName = requestBody.data.title;
+  const displayName = (requestBody as any).data.title;
 
   console.log(userPubkey);
 
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
       {
         id: newId,
         title: userPubkey,
-        amount: txAmount,
+        amount: Number(txAmount),
         display_name: displayName,
       },
     ]);

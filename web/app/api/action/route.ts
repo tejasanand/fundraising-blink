@@ -29,8 +29,8 @@ export async function GET(request: Request) {
   const latestEntry = data[0];
   console.log('Latest entry:', latestEntry);
 
-  const latestAmount = latestEntry.amount;
-  const latestAmountBy = latestEntry.display_name;
+  const latestAmount = latestEntry?.amount as number;
+  const latestAmountBy = latestEntry?.display_name as string;
 
   console.log(latestAmount);
   console.log(latestAmountBy);
@@ -38,6 +38,7 @@ export async function GET(request: Request) {
   let highestAmount = 0;
   let highestAmountBy = '';
   let highestAmountEntry: any = null;
+
   data.forEach((note: any) => {
     if (note.amount && note.amount > highestAmount) {
       highestAmount = note.amount;
@@ -75,11 +76,8 @@ export async function GET(request: Request) {
           parameters: [
             // {amount} input field
             {
-              type: 'text',
               name: 'title',
               label: 'Display Name',
-              min: 3,
-              max: 20,
             },
             {
               name: 'amount', // input field name
