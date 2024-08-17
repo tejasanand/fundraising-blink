@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   const connection = new Connection(clusterApiUrl('mainnet-beta'));
   const ix = SystemProgram.transfer({
     fromPubkey: user,
-    toPubkey: new PublicKey('Gfnt56Lqjm8fepkJzsRKv493J9qC8cQwaDiYNM26tHd6'),
+    toPubkey: new PublicKey('BsdgGRzDmVTM8FBepRXrQixMZgjP6smsSbuDb1Y7VJB6'),
     lamports: Number(txAmount) * 1000000000, // Convert SOL to lamports
   });
   const tx = new Transaction();
