@@ -1,37 +1,31 @@
 import {
-  ActionGetResponse,
   ActionPostRequest,
   ActionPostResponse,
   ACTIONS_CORS_HEADERS,
 } from '@solana/actions';
 import { clusterApiUrl, SystemProgram, Connection } from '@solana/web3.js';
 import supabase from '@/app/db/supabaseClient';
-
-import { PublicKey } from '@solana/web3.js';
-
-import { Transaction } from '@solana/web3.js';
+import { PublicKey, Transaction } from '@solana/web3.js';
 
 export async function POST(request: Request) {
   const requestBody: ActionPostRequest = await request.json();
   const url = new URL(request.url);
   console.log('Request Body:', requestBody);
+
   const txAmount = url.searchParams.get('amount');
   const userPubkey = requestBody.account;
   const displayName = (requestBody as any).data.title;
 
   console.log(userPubkey);
-
   console.log(txAmount);
-
   console.log(displayName);
 
-  console.log();
   const user = new PublicKey(userPubkey);
   const connection = new Connection(clusterApiUrl('mainnet-beta'));
   const ix = SystemProgram.transfer({
     fromPubkey: user,
     toPubkey: new PublicKey('Gfnt56Lqjm8fepkJzsRKv493J9qC8cQwaDiYNM26tHd6'),
-    lamports: 1,
+    lamports: Number(txAmount) * 1000000000, // Convert SOL to lamports
   });
   const tx = new Transaction();
   tx.add(ix);
@@ -93,6 +87,7 @@ export async function POST(request: Request) {
     });
   }
 
+  // Return only the transaction and message
   return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
 }
 
