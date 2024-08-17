@@ -90,3 +90,7 @@ export async function GET(request: Request) {
   });
   return response;
 }
+
+export async function OPTIONS(request: Request) {
+  return new Response(null, { headers: ACTIONS_CORS_HEADERS });
+}
