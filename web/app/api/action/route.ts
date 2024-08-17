@@ -64,10 +64,6 @@ export async function GET(request: Request) {
     description: `Highest contributor: ${highestAmountBy} - ${highestAmount} SOL, Latest: ${latestAmountBy} - ${latestAmount} SOL`,
     title: 'Donate to a good cause',
     label: 'Stake SOL',
-    error: {
-      message: 'This blink is not implemented yet!',
-    },
-
     links: {
       actions: [
         {
