@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./web/*"]
+      "@/*": ["./web/*"],
+      "@solana/actions": ["node_modules/@solana/actions"]
     }
   },
   "exclude": ["node_modules", "tmp"]
