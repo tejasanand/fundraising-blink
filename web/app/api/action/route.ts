@@ -12,12 +12,56 @@ import { PublicKey } from '@solana/web3.js';
 import { Transaction } from '@solana/web3.js';
 
 export async function GET(request: Request) {
-  const { data: notes, error } = await supabase.from('notes').select('*');
-  console.log(notes);
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .order('id', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching notes:', error);
+    return new Response(JSON.stringify({ error: 'Error fetching notes' }), {
+      status: 500,
+    });
+  }
+
+  console.log('Fetched notes:', data);
+
+  const latestEntry = data[0];
+  console.log('Latest entry:', latestEntry);
+
+  const latestAmount = latestEntry.amount;
+  const latestAmountBy = latestEntry.display_name;
+
+  console.log(latestAmount);
+  console.log(latestAmountBy);
+
+  let highestAmount = 0;
+  let highestAmountBy = '';
+  let highestAmountEntry: any = null;
+  data.forEach((note: any) => {
+    if (note.amount && note.amount > highestAmount) {
+      highestAmount = note.amount;
+      console.log(note.display_name);
+      if (note.display_name !== null) {
+        highestAmountBy = note.display_name;
+      }
+      highestAmountEntry = note;
+      console.log(note.display_name);
+    }
+  });
+
+  if (highestAmountEntry) {
+    console.log(
+      `Highest amount entry: ${highestAmountEntry.id} with amount ${highestAmount}`
+    );
+  } else {
+    console.log('No entries with amount found.');
+  }
+
   const responseBody: ActionGetResponse = {
     icon: 'https://i.ibb.co/swzXkcM/solana.webp',
-    description: 'My blink',
-    title: 'Blink',
+    description: `Highest contributor: ${highestAmountBy} - ${highestAmount} SOL, Latest: ${latestAmountBy} - ${latestAmount} SOL`,
+    title: 'Donate to a good cause',
     label: 'Stake SOL',
     error: {
       message: 'This blink is not implemented yet!',
@@ -30,6 +74,13 @@ export async function GET(request: Request) {
           href: '/api/action/donate?amount={amount}', // or /api/donate?amount={amount}
           parameters: [
             // {amount} input field
+            {
+              type: 'text',
+              name: 'title',
+              label: 'Display Name',
+              min: 3,
+              max: 20,
+            },
             {
               name: 'amount', // input field name
               label: 'SOL amount', // text input placeholder
