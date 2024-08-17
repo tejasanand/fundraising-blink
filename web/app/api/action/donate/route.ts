@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     message: 'Thank you for donating anon',
   };
 
-  const { data, error } = await supabase.supabase
+  const { data, error } = await supabase
     .from('notes')
     .select('id')
     .order('id', { ascending: false })
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     newId = 1;
   }
 
-  const { data: insertData, error: insertError } = await supabase.supabase
+  const { data: insertData, error: insertError } = await supabase
     .from('notes')
     .insert([
       {
