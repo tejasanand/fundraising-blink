@@ -85,7 +85,8 @@ export async function GET(request: Request) {
     },
   };
 
-  return Response.json(responseBody, {
+  const response = Response.json(responseBody, {
     headers: ACTIONS_CORS_HEADERS,
   });
+  return response;
 }

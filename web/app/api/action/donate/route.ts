@@ -42,11 +42,6 @@ export async function POST(request: Request) {
     .serialize({ requireAllSignatures: false, verifySignatures: false })
     .toString('base64');
 
-  const response: ActionPostResponse = {
-    transaction: serialTX,
-    message: 'Thank you for donating anon',
-  };
-
   const { data, error } = await supabase
     .from('notes')
     .select('id')
@@ -88,6 +83,11 @@ export async function POST(request: Request) {
   }
 
   // Return only the transaction and message
+
+  const response: ActionPostResponse = {
+    transaction: serialTX,
+    message: 'Thank you for donating anon',
+  };
   return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
 }
 
