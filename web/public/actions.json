@@ -2,7 +2,7 @@
     "rules": [
       {
         "pathPattern": "/*",
-        "apiPath": "/api/action"
+        "apiPath": "/"
       }
     ]
   }
