@@ -1,12 +1,47 @@
-//@ts-check
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { composePlugins, withNx } = require('@nx/next');
 
-/**
- * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
- **/
+/** @type {import('next').NextConfig} */
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/api/action/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Accept, Content-Type, Content-Encoding, Accept-Encoding',
+          },
+        ],
+      },
+      {
+        source: '/actions.json',
+        headers: [
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Accept, Content-Type, Content-Encoding, Accept-Encoding',
+          },
+        ],
+      },
+    ];
+  },
   webpack: (config) => {
     config.externals = [
       ...(config.externals || []),
@@ -16,14 +51,11 @@ const nextConfig = {
     return config;
   },
   nx: {
-    // Set this to true if you would like to use SVGR
-    // See: https://github.com/gregberge/svgr
     svgr: false,
   },
 };
 
 const plugins = [
-  // Add more Next.js plugins to this list if needed.
   withNx,
 ];
 
