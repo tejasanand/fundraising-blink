@@ -16,4 +16,4 @@ export const GET = async () => {
   });
 };
 
-// export const OPTIONS = GET;
+export const OPTIONS = GET;
