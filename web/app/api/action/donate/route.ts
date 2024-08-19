@@ -36,6 +36,39 @@ export async function GET(request: Request) {
 
   console.log('Fetched notes:', data);
 
+  const latestEntry = data[0];
+  console.log('Latest entry:', latestEntry);
+
+  const latestAmount = latestEntry?.amount as number;
+  const latestAmountBy = latestEntry?.display_name as string;
+
+  console.log(latestAmount);
+  console.log(latestAmountBy);
+
+  let highestAmount = 0;
+  let highestAmountBy = '';
+  let highestAmountEntry: any = null;
+
+  data.forEach((note: any) => {
+    if (note.amount && note.amount > highestAmount) {
+      highestAmount = note.amount;
+      console.log(note.display_name);
+      if (note.display_name !== null) {
+        highestAmountBy = note.display_name;
+      }
+      highestAmountEntry = note;
+      console.log(note.display_name);
+    }
+  });
+
+  if (highestAmountEntry) {
+    console.log(
+      `Highest amount entry: ${highestAmountEntry.id} with amount ${highestAmount}`
+    );
+  } else {
+    console.log('No entries with amount found.');
+  }
+
   const responseBody: ActionGetResponse = {
     icon: 'https://i.ibb.co/swzXkcM/solana.webp',
     description: `Highest contributorSOL`,
@@ -66,6 +99,8 @@ export async function GET(request: Request) {
   });
   return response;
 }
+
+export const OPTIONS = GET;
 
 export async function POST(request: Request) {
   try {
@@ -118,6 +153,49 @@ export async function POST(request: Request) {
       message: 'Thank you for donating anon',
     };
 
+    const { data, error } = await supabase
+      .from('notes')
+      .select('id')
+      .order('id', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.error('Error fetching last entry:', error);
+      return new Response(
+        JSON.stringify({ error: 'Error fetching last entry' }),
+        { status: 500 }
+      );
+    }
+
+    let newId;
+    if (data && data.length > 0) {
+      const lastId = data[0].id;
+      newId = lastId + 1;
+    } else {
+      newId = 1;
+    }
+
+    const { data: insertData, error: insertError } = await supabase
+      .from('notes')
+      .insert([
+        {
+          id: newId,
+          title: userPubkey,
+          amount: Number(txAmount),
+          display_name: displayName,
+        },
+      ]);
+
+    if (insertError) {
+      console.error('Error inserting new row:', insertError);
+      return new Response(
+        JSON.stringify({ error: 'Error inserting new row' }),
+        {
+          status: 500,
+        }
+      );
+    }
+
     return new Response(JSON.stringify(response), {
       status: 200,
       headers: CORS_HEADERS,
@@ -136,5 +214,3 @@ export async function POST(request: Request) {
     });
   }
 }
-
-export const OPTIONS = GET;
