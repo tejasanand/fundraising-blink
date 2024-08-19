@@ -22,19 +22,19 @@ const CORS_HEADERS = {
 };
 
 export async function GET(request: Request) {
-  // const { data, error } = await supabase
-  //   .from('notes')
-  //   .select('*')
-  //   .order('id', { ascending: false });
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .order('id', { ascending: false });
 
-  // if (error) {
-  //   console.error('Error fetching notes:', error);
-  //   return new Response(JSON.stringify({ error: 'Error fetching notes' }), {
-  //     status: 501,
-  //   });
-  // }
+  if (error) {
+    console.error('Error fetching notes:', error);
+    return new Response(JSON.stringify({ error: 'Error fetching notes' }), {
+      status: 501,
+    });
+  }
 
-  // console.log('Fetched notes:', data);
+  console.log('Fetched notes:', data);
 
   const responseBody: ActionGetResponse = {
     icon: 'https://i.ibb.co/swzXkcM/solana.webp',

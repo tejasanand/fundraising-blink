@@ -1,4 +1,5 @@
-import supabase from '@/app/db/supabaseClient';
+import { createClient } from '@/utils/supabase/server';
+import { cookies } from 'next/headers';
 
 <head>
   <title>The Rock (1996)</title>
@@ -12,7 +13,11 @@ import supabase from '@/app/db/supabaseClient';
   ...
 </head>;
 
-export default function Page() {
-  console.log(supabase);
+export default async function Page() {
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: todos } = await supabase.from('todos').select();
+
   return <h1>hello</h1>;
 }
