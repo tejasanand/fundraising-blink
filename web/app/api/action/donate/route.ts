@@ -12,6 +12,13 @@ import {
   Transaction,
 } from '@solana/web3.js';
 
+const CORS_HEADERS = {
+  ...ACTIONS_CORS_HEADERS,
+  'Access-Control-Allow-Origin': '*', // Allow any origin
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 export async function GET(request: Request) {
   const responseBody: ActionGetResponse = {
     icon: 'https://i.ibb.co/swzXkcM/solana.webp',
@@ -54,7 +61,15 @@ export async function POST(request: Request) {
 
     // Validate the input
     if (!userPubkey || !txAmount) {
-      throw new Error('Missing required fields: account or amount');
+      return new Response(
+        JSON.stringify({
+          message: 'Missing required fields: account or amount',
+        }),
+        {
+          status: 400,
+          headers: CORS_HEADERS,
+        }
+      );
     }
 
     const displayName = (requestBody as any).data?.title;
@@ -87,8 +102,10 @@ export async function POST(request: Request) {
       message: 'Thank you for donating anon',
     };
 
-    // Return only the transaction and message
-    return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: CORS_HEADERS,
+    });
   } catch (error) {
     console.error('Error processing POST request:', error);
 
@@ -97,14 +114,10 @@ export async function POST(request: Request) {
       errorMessage = error.message;
     }
 
-    // Return a generic error response
-    return Response.json(
-      { message: errorMessage },
-      {
-        status: 500,
-        headers: ACTIONS_CORS_HEADERS,
-      }
-    );
+    return new Response(JSON.stringify({ message: errorMessage }), {
+      status: 500,
+      headers: CORS_HEADERS,
+    });
   }
 }
 
