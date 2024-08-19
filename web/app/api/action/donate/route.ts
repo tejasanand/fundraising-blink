@@ -71,7 +71,7 @@ export async function GET(request: Request) {
 
   const responseBody: ActionGetResponse = {
     icon: 'https://i.ibb.co/swzXkcM/solana.webp',
-    description: `Highest contributorSOL`,
+    description: `Highest contributor - ${highestAmountBy}:${highestAmount}, Latest: ${latestAmountBy}:${latestAmount}`,
     title: 'Donate to a good cause',
     label: 'Stake SOL',
     links: {
