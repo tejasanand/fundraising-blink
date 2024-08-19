@@ -5,7 +5,7 @@ import {
   ACTIONS_CORS_HEADERS,
 } from '@solana/actions';
 import { clusterApiUrl, SystemProgram, Connection } from '@solana/web3.js';
-import supabase from '@/app/db/supabaseClient';
+// import supabase from '@/app/db/supabaseClient';
 
 import { PublicKey } from '@solana/web3.js';
 
@@ -19,10 +19,6 @@ export async function POST(request: Request) {
   const txAmount = url.searchParams.get('amount');
   const userPubkey = requestBody.account;
   const displayName = (requestBody as any).data.title;
-
-  console.log(userPubkey);
-  console.log(txAmount);
-  console.log(displayName);
 
   const user = new PublicKey(userPubkey);
   const connection = new Connection(clusterApiUrl('mainnet-beta'));
@@ -51,45 +47,45 @@ export async function POST(request: Request) {
     message: 'Thank you for donating anon',
   };
 
-  const { data, error } = await supabase
-    .from('notes')
-    .select('id')
-    .order('id', { ascending: false })
-    .limit(1);
+  // const { data, error } = await supabase
+  //   .from('notes')
+  //   .select('id')
+  //   .order('id', { ascending: false })
+  //   .limit(1);
 
-  if (error) {
-    console.error('Error fetching last entry:', error);
-    return new Response(
-      JSON.stringify({ error: 'Error fetching last entry' }),
-      { status: 500 }
-    );
-  }
+  // if (error) {
+  //   console.error('Error fetching last entry:', error);
+  //   return new Response(
+  //     JSON.stringify({ error: 'Error fetching last entry' }),
+  //     { status: 500 }
+  //   );
+  // }
 
-  let newId;
-  if (data && data.length > 0) {
-    const lastId = data[0].id;
-    newId = lastId + 1;
-  } else {
-    newId = 1;
-  }
+  // let newId;
+  // if (data && data.length > 0) {
+  //   const lastId = data[0].id;
+  //   newId = lastId + 1;
+  // } else {
+  //   newId = 1;
+  // }
 
-  const { data: insertData, error: insertError } = await supabase
-    .from('notes')
-    .insert([
-      {
-        id: newId,
-        title: userPubkey,
-        amount: Number(txAmount),
-        display_name: displayName,
-      },
-    ]);
+  // const { data: insertData, error: insertError } = await supabase
+  //   .from('notes')
+  //   .insert([
+  //     {
+  //       id: newId,
+  //       title: userPubkey,
+  //       amount: Number(txAmount),
+  //       display_name: displayName,
+  //     },
+  //   ]);
 
-  if (insertError) {
-    console.error('Error inserting new row:', insertError);
-    return new Response(JSON.stringify({ error: 'Error inserting new row' }), {
-      status: 500,
-    });
-  }
+  // if (insertError) {
+  //   console.error('Error inserting new row:', insertError);
+  //   return new Response(JSON.stringify({ error: 'Error inserting new row' }), {
+  //     status: 500,
+  //   });
+  // }
 
   // Return only the transaction and message
   return Response.json(response, { headers: ACTIONS_CORS_HEADERS });
