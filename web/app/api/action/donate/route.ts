@@ -70,7 +70,7 @@ export async function GET(request: Request) {
   }
 
   const responseBody: ActionGetResponse = {
-    icon: 'https://i.ibb.co/swzXkcM/solana.webp',
+    icon: 'https://ipfs.io/ipfs/QmNzuaVxi7zguTw5dxw39hLHjfVZ8YHd51RYtZYqRPxYXg',
     description: `Highest contributor - ${highestAmountBy} : ${highestAmount} | Latest - ${latestAmountBy} : ${latestAmount}`,
     title: 'Raise funds for developers on Solana',
     label: 'Stake SOL',
