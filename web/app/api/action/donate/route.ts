@@ -20,10 +20,9 @@ const supabase = createClient(
 );
 
 const CORS_HEADERS = {
-  ...ACTIONS_CORS_HEADERS,
-  'Access-Control-Allow-Origin': '*', // Allow any origin
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 export async function GET(request: Request) {
@@ -181,7 +180,12 @@ export async function GET(request: Request) {
   });
 }
 
-export const OPTIONS = GET;
+export async function OPTIONS(request: Request) {
+  return new Response(null, {
+    status: 204,
+    headers: CORS_HEADERS,
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -192,7 +196,10 @@ export async function POST(request: Request) {
     const uniqueId = url.searchParams.get('uniqueid');
     const userPubkey = requestBody.account;
 
+    console.log('Received POST request:', { txAmount, uniqueId, userPubkey });
+
     if (!userPubkey || !txAmount || !uniqueId) {
+      console.error('Missing required fields:', { userPubkey, txAmount, uniqueId });
       return new Response(
         JSON.stringify({
           message: 'Missing required fields: account, amount, or uniqueid',
@@ -208,9 +215,11 @@ export async function POST(request: Request) {
 
     const tableName = `blink_${uniqueId}`;
 
+    console.log('Fetching blink data from table:', tableName);
+
     const { data: blinkData, error: blinkError } = await supabase
       .from(tableName)
-      .select('destination_wallet')
+      .select('destination_wallet, image_url, title, campaign_id')
       .eq('id', 1)
       .single();
 
@@ -221,6 +230,16 @@ export async function POST(request: Request) {
         headers: CORS_HEADERS,
       });
     }
+
+    if (!blinkData) {
+      console.error('Blink data not found for uniqueId:', uniqueId);
+      return new Response(JSON.stringify({ error: 'Blink data not found' }), {
+        status: 404,
+        headers: CORS_HEADERS,
+      });
+    }
+
+    console.log('Blink data fetched successfully:', blinkData);
 
     const user = new PublicKey(userPubkey);
     const connection = new Connection(clusterApiUrl('mainnet-beta'));
@@ -245,12 +264,18 @@ export async function POST(request: Request) {
       .serialize({ requireAllSignatures: false, verifySignatures: false })
       .toString('base64');
 
+    console.log('Transaction created successfully');
+
     const { error: insertError } = await supabase
       .from(tableName)
       .insert([
         {
           amount: Number(txAmount),
           display_name: displayName,
+          image_url: blinkData.image_url,
+          title: blinkData.title,
+          destination_wallet: blinkData.destination_wallet,
+          campaign_id: blinkData.campaign_id
         },
       ]);
 
@@ -265,6 +290,8 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log('Donation inserted successfully');
+
     const response: ActionPostResponse = {
       transaction: serialTX,
       message: 'Thank you for donating!',
@@ -275,7 +302,7 @@ export async function POST(request: Request) {
       headers: CORS_HEADERS,
     });
   } catch (error) {
-    console.error('Error processing POST request:', error);
+    console.error('Unexpected error in POST handler:', error);
     let errorMessage = 'An unexpected error occurred';
     if (error instanceof Error) {
       errorMessage = error.message;
