@@ -27,66 +27,143 @@ const CORS_HEADERS = {
 };
 
 export async function GET(request: Request) {
-  const { data, error } = await supabase
-    .from('notes')
-    .select('*')
-    .order('id', { ascending: false });
+  const url = new URL(request.url);
+  const uniqueId = url.searchParams.get('uniqueid');
 
-  if (error) {
-    console.error('Error fetching notes:', error);
-    return new Response(JSON.stringify({ error: 'Error fetching notes' }), {
-      status: 501,
+  // Handle the case without uniqueId (original functionality)
+  if (!uniqueId) {
+    const { data, error } = await supabase
+      .from('notes')
+      .select('*')
+      .order('id', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching notes:', error);
+      return new Response(JSON.stringify({ error: 'Error fetching notes' }), {
+        status: 501,
+        headers: CORS_HEADERS,
+      });
+    }
+
+    console.log('Fetched notes:', data);
+
+    const latestEntry = data[0];
+    console.log('Latest entry:', latestEntry);
+
+    const latestAmount = latestEntry?.amount as number;
+    const latestAmountBy = latestEntry?.display_name as string;
+
+    console.log(latestAmount);
+    console.log(latestAmountBy);
+
+    let highestAmount = 0;
+    let highestAmountBy = '';
+    let highestAmountEntry: any = null;
+
+    data.forEach((note: any) => {
+      if (note.amount && note.amount > highestAmount) {
+        highestAmount = note.amount;
+        console.log(note.display_name);
+        if (note.display_name !== null) {
+          highestAmountBy = note.display_name;
+        }
+        highestAmountEntry = note;
+        console.log(note.display_name);
+      }
+    });
+
+    if (highestAmountEntry) {
+      console.log(
+        `Highest amount entry: ${highestAmountEntry.id} with amount ${highestAmount}`
+      );
+    } else {
+      console.log('No entries with amount found.');
+    }
+
+    const responseBody: ActionGetResponse = {
+      icon: 'https://ipfs.io/ipfs/QmNzuaVxi7zguTw5dxw39hLHjfVZ8YHd51RYtZYqRPxYXg',
+      description: `Highest contributor - ${highestAmountBy} : ${highestAmount} | Latest - ${latestAmountBy} : ${latestAmount}`,
+      title: 'Raise funds for developers on Solana',
+      label: 'Stake SOL',
+      links: {
+        actions: [
+          {
+            label: 'Donate',
+            href: '/api/action/donate?amount={amount}',
+            parameters: [
+              {
+                name: 'title',
+                label: 'Display Name',
+              },
+              {
+                name: 'amount',
+                label: 'SOL amount',
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    return Response.json(responseBody, {
+      headers: CORS_HEADERS,
     });
   }
 
-  console.log('Fetched notes:', data);
+  // Handle the case with uniqueId (new functionality)
+  const tableName = `blink_${uniqueId}`;
 
-  const latestEntry = data[0];
-  console.log('Latest entry:', latestEntry);
+  const { data: blinkData, error: blinkError } = await supabase
+    .from(tableName)
+    .select('*')
+    .eq('id', 1)
+    .single();
 
-  const latestAmount = latestEntry?.amount as number;
-  const latestAmountBy = latestEntry?.display_name as string;
+  if (blinkError) {
+    console.error('Error fetching blink data:', blinkError);
+    return new Response(JSON.stringify({ error: 'Error fetching blink data' }), {
+      status: 500,
+      headers: CORS_HEADERS,
+    });
+  }
 
-  console.log(latestAmount);
-  console.log(latestAmountBy);
+  const { data: donations, error: donationsError } = await supabase
+    .from(tableName)
+    .select('amount, display_name')
+    .order('id', { ascending: false });
+
+  if (donationsError) {
+    console.error('Error fetching donations:', donationsError);
+    return new Response(JSON.stringify({ error: 'Error fetching donations' }), {
+      status: 500,
+      headers: CORS_HEADERS,
+    });
+  }
 
   let highestAmount = 0;
   let highestAmountBy = '';
-  let highestAmountEntry: any = null;
+  const latestDonation = donations[0];
 
-  data.forEach((note: any) => {
-    if (note.amount && note.amount > highestAmount) {
-      highestAmount = note.amount;
-      console.log(note.display_name);
-      if (note.display_name !== null) {
-        highestAmountBy = note.display_name;
-      }
-      highestAmountEntry = note;
-      console.log(note.display_name);
+  donations.forEach((donation: any) => {
+    if (donation.amount > highestAmount) {
+      highestAmount = donation.amount;
+      highestAmountBy = donation.display_name || 'Anonymous';
     }
   });
 
-  if (highestAmountEntry) {
-    console.log(
-      `Highest amount entry: ${highestAmountEntry.id} with amount ${highestAmount}`
-    );
-  } else {
-    console.log('No entries with amount found.');
-  }
-
   const responseBody: ActionGetResponse = {
-    icon: 'https://ipfs.io/ipfs/QmNzuaVxi7zguTw5dxw39hLHjfVZ8YHd51RYtZYqRPxYXg',
-    description: `Highest contributor - ${highestAmountBy} : ${highestAmount} | Latest - ${latestAmountBy} : ${latestAmount}`,
-    title: 'Raise funds for developers on Solana',
-    label: 'Stake SOL',
+    icon: blinkData.image_url,
+    description: `Highest contributor - ${highestAmountBy}: ${highestAmount} | Latest - ${latestDonation?.display_name || 'Anonymous'}: ${latestDonation?.amount || 0}`,
+    title: blinkData.title,
+    label: 'Donate SOL',
     links: {
       actions: [
         {
           label: 'Donate',
-          href: '/api/action/donate?amount={amount}',
+          href: `/api/action/donate?amount={amount}&uniqueid=${uniqueId}`,
           parameters: [
             {
-              name: 'title',
+              name: 'display_name',
               label: 'Display Name',
             },
             {
@@ -99,10 +176,9 @@ export async function GET(request: Request) {
     },
   };
 
-  const response = Response.json(responseBody, {
-    headers: ACTIONS_CORS_HEADERS,
+  return Response.json(responseBody, {
+    headers: CORS_HEADERS,
   });
-  return response;
 }
 
 export const OPTIONS = GET;
@@ -113,13 +189,13 @@ export async function POST(request: Request) {
     const url = new URL(request.url);
 
     const txAmount = url.searchParams.get('amount');
+    const uniqueId = url.searchParams.get('uniqueid');
     const userPubkey = requestBody.account;
 
-    // Validate the input
-    if (!userPubkey || !txAmount) {
+    if (!userPubkey || !txAmount || !uniqueId) {
       return new Response(
         JSON.stringify({
-          message: 'Missing required fields: account or amount',
+          message: 'Missing required fields: account, amount, or uniqueid',
         }),
         {
           status: 400,
@@ -128,14 +204,30 @@ export async function POST(request: Request) {
       );
     }
 
-    const displayName = (requestBody as any).data?.title;
+    const displayName = (requestBody as any).data?.display_name || 'Anonymous';
+
+    const tableName = `blink_${uniqueId}`;
+
+    const { data: blinkData, error: blinkError } = await supabase
+      .from(tableName)
+      .select('destination_wallet')
+      .eq('id', 1)
+      .single();
+
+    if (blinkError) {
+      console.error('Error fetching blink data:', blinkError);
+      return new Response(JSON.stringify({ error: 'Error fetching blink data' }), {
+        status: 500,
+        headers: CORS_HEADERS,
+      });
+    }
 
     const user = new PublicKey(userPubkey);
     const connection = new Connection(clusterApiUrl('mainnet-beta'));
     const ix = SystemProgram.transfer({
       fromPubkey: user,
-      toPubkey: new PublicKey('BsdgGRzDmVTM8FBepRXrQixMZgjP6smsSbuDb1Y7VJB6'),
-      lamports: Number(txAmount) * 1000000000, // Convert SOL to lamports
+      toPubkey: new PublicKey(blinkData.destination_wallet),
+      lamports: Number(txAmount) * 1000000000,
     });
     const tx = new Transaction();
     tx.add(ix);
@@ -153,53 +245,30 @@ export async function POST(request: Request) {
       .serialize({ requireAllSignatures: false, verifySignatures: false })
       .toString('base64');
 
-    const response: ActionPostResponse = {
-      transaction: serialTX,
-      message: 'Thank you for donating anon',
-    };
-
-    const { data, error } = await supabase
-      .from('notes')
-      .select('id')
-      .order('id', { ascending: false })
-      .limit(1);
-
-    if (error) {
-      console.error('Error fetching last entry:', error);
-      return new Response(
-        JSON.stringify({ error: 'Error fetching last entry' }),
-        { status: 500 }
-      );
-    }
-
-    let newId;
-    if (data && data.length > 0) {
-      const lastId = data[0].id;
-      newId = lastId + 1;
-    } else {
-      newId = 1;
-    }
-
-    const { data: insertData, error: insertError } = await supabase
-      .from('notes')
+    const { error: insertError } = await supabase
+      .from(tableName)
       .insert([
         {
-          id: newId,
-          title: userPubkey,
           amount: Number(txAmount),
           display_name: displayName,
         },
       ]);
 
     if (insertError) {
-      console.error('Error inserting new row:', insertError);
+      console.error('Error inserting new donation:', insertError);
       return new Response(
-        JSON.stringify({ error: 'Error inserting new row' }),
+        JSON.stringify({ error: 'Error inserting new donation' }),
         {
           status: 500,
+          headers: CORS_HEADERS,
         }
       );
     }
+
+    const response: ActionPostResponse = {
+      transaction: serialTX,
+      message: 'Thank you for donating!',
+    };
 
     return new Response(JSON.stringify(response), {
       status: 200,
@@ -207,12 +276,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Error processing POST request:', error);
-
     let errorMessage = 'An unexpected error occurred';
     if (error instanceof Error) {
       errorMessage = error.message;
     }
-
     return new Response(JSON.stringify({ message: errorMessage }), {
       status: 500,
       headers: CORS_HEADERS,

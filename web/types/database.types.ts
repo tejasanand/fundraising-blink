@@ -86,6 +86,7 @@ export interface Database {
           p_image_url: string;
           p_title: string;
           p_destination_wallet: string;
+          p_campaign_id: string;
         };
         Returns: void;
       }

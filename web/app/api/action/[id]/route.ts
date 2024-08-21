@@ -21,6 +21,16 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+interface BlinkData {
+  id: number;
+  image_url: string;
+  title: string;
+  destination_wallet: string;
+  campaign_id: string;
+  amount?: number;
+  display_name?: string;
+}
+
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const tableName = `blink_${params.id}` as `blink_${string}`;
 
@@ -38,6 +48,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
       headers: CORS_HEADERS,
     });
   }
+
+  const typedBlinkData = blinkData as BlinkData;
 
   // Fetch donations for this blink
   const { data: donations, error: donationsError } = await supabase
@@ -66,15 +78,15 @@ export async function GET(request: Request, { params }: { params: { id: string }
   });
 
   const responseBody: ActionGetResponse = {
-    icon: blinkData.image_url,
+    icon: typedBlinkData.image_url,
     description: `Highest contributor - ${highestAmountBy}: ${highestAmount} | Latest - ${latestDonation?.display_name || 'Anonymous'}: ${latestDonation?.amount || 0}`,
-    title: blinkData.title ?? 'Untitled Blink', // Provide a default value if title is null
+    title: typedBlinkData.title ?? 'Untitled Blink',
     label: 'Donate SOL',
     links: {
       actions: [
         {
           label: 'Donate',
-          href: `/api/action/${params.id}/donate?amount={amount}`,
+          href: `/api/action/${params.id}/donate?amount={amount}&campaign=${typedBlinkData.campaign_id}`,
           parameters: [
             {
               name: 'display_name',
@@ -199,6 +211,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
         }
       );
     }
+
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: CORS_HEADERS,
+    });
   } catch (error) {
     console.error('Error processing POST request:', error);
 

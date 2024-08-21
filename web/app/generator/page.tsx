@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import supabase from '@/app/db/supabaseClient';
 
-
 export default function GeneratorPage() {
   const [imageUrl, setImageUrl] = useState('');
   const [title, setTitle] = useState('');
@@ -16,6 +15,7 @@ export default function GeneratorPage() {
     
     const uniqueId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const tableName = `blink_${uniqueId}`;
+    const campaignId = uniqueId; // Use uniqueId as campaign_id for consistency
 
     console.log('Creating blink with ID:', uniqueId);
 
@@ -24,7 +24,8 @@ export default function GeneratorPage() {
         table_name: tableName,
         p_image_url: imageUrl,
         p_title: title,
-        p_destination_wallet: destinationWallet
+        p_destination_wallet: destinationWallet,
+        p_campaign_id: campaignId
       });
 
       if (tableError) {
@@ -35,8 +36,10 @@ export default function GeneratorPage() {
 
       console.log('Blink created successfully with ID:', uniqueId);
 
-      // Redirect to the new blink page
-      router.push(`/api/action/${uniqueId}`);
+      // Redirect to dial.to with the new campaign URL
+      const campaignUrl = encodeURIComponent(`http://localhost:3000/api/action/donate?uniqueid=${uniqueId}`);
+      const redirectUrl = `https://dial.to/developer?url=${campaignUrl}&cluster=mainnet`;
+      router.push(redirectUrl);
     } catch (error) {
       console.error('Unexpected error:', error);
       // Display error to user
@@ -47,7 +50,6 @@ export default function GeneratorPage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-500 flex flex-col justify-center items-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
         <div className="text-center mb-8">
-         
           <h1 className="text-3xl font-bold text-gray-800">EzFund</h1>
           <p className="text-gray-600 mt-2">Launch your fundraising campaign in seconds</p>
         </div>
