@@ -15,7 +15,7 @@ import supabase from '@/app/db/supabaseClient';
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
@@ -120,6 +120,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   }
 }
 
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: CORS_HEADERS });
+export async function OPTIONS(request: Request) {
+  return new Response(null, {
+    status: 204,
+    headers: CORS_HEADERS,
+  });
 }

@@ -15,10 +15,9 @@ import {
 import supabase from '@/app/db/supabaseClient';
 
 const CORS_HEADERS = {
-  ...ACTIONS_CORS_HEADERS,
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 interface BlinkData {
@@ -107,7 +106,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
   });
 }
 
-export const OPTIONS = GET;
+export async function OPTIONS(request: Request) {
+  return new Response(null, {
+    status: 204,
+    headers: CORS_HEADERS,
+  });
+}
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
