@@ -24,7 +24,11 @@ export function UiLayout({
 }) {
   const pathname = usePathname();
 
-  return <h1>Something big is coming - Cusp</h1>;
+  return (
+    <div>
+      {children}
+    </div>
+  );
 }
 
 export function AppModal({
