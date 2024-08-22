@@ -7,16 +7,22 @@ export const metadata = {
 
 export default function Page() {
   return (
-    <head>
-      <title>The Rock (1996)</title>
-      <meta property="og:title" content="The Rock" />
-      <meta property="og:type" content="video.movie" />
-      <meta property="og:url" content="https://www.imdb.com/title/tt0117500/" />
-      <meta
-        property="og:image"
-        content="https://ia.media-imdb.com/images/rock.jpg"
-      />
-    </head>
+    <>
+      <head>
+        <title>EzFund - Create Your Donation Link</title>
+        <meta property="og:title" content="EzFund - Create Your Donation Link" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://your-domain.com" />
+        <meta
+          property="og:image"
+          content="https://your-domain.com/path-to-your-image.jpg"
+        />
+        <meta
+          property="og:description"
+          content="Launch your fundraising campaign in seconds with EzFund"
+        />
+      </head>
+      {redirect('/generator')}
+    </>
   );
-  redirect('/generator');
 }
