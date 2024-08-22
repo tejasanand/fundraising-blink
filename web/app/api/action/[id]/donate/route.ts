@@ -66,7 +66,7 @@ export async function POST(
         }
       );
     }
-    const displayName = (requestBody as any).data?.display_name || 'Anonymous';
+    const displayName = (requestBody as any).data?.display_name;
 
     const user = new PublicKey(userPubkey);
     const connection = new Connection(clusterApiUrl('mainnet-beta'));

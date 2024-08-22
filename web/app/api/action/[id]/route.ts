@@ -72,13 +72,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
   donations.forEach((donation: any) => {
     if (donation.amount > highestAmount) {
       highestAmount = donation.amount;
-      highestAmountBy = donation.display_name || 'Anonymous';
+      highestAmountBy = donation.display_name;
     }
   });
 
   const responseBody: ActionGetResponse = {
     icon: typedBlinkData.image_url,
-    description: `Highest contributor - ${highestAmountBy}: ${highestAmount} | Latest - ${latestDonation?.display_name || 'Anonymous'}: ${latestDonation?.amount || 0}`,
+    description: `Highest contributor - ${highestAmountBy}: ${highestAmount} | Latest - ${latestDonation?.display_name}: ${latestDonation?.amount || 0}`,
     title: typedBlinkData.title ?? 'Untitled Blink',
     label: 'Donate SOL',
     links: {
