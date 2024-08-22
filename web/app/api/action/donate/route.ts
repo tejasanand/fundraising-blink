@@ -20,9 +20,10 @@ const supabase = createClient(
 );
 
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
+  ...ACTIONS_CORS_HEADERS,
+  'Access-Control-Allow-Origin': '*', // Allow any origin
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type',
 };
 
 export async function GET(request: Request) {
@@ -40,7 +41,6 @@ export async function GET(request: Request) {
       console.error('Error fetching notes:', error);
       return new Response(JSON.stringify({ error: 'Error fetching notes' }), {
         status: 501,
-        headers: CORS_HEADERS,
       });
     }
 
@@ -104,9 +104,10 @@ export async function GET(request: Request) {
       },
     };
 
-    return Response.json(responseBody, {
+    const response = Response.json(responseBody, {
       headers: CORS_HEADERS,
     });
+    return response;
   }
 
   // Handle the case with uniqueId (new functionality)
@@ -181,7 +182,7 @@ export async function GET(request: Request) {
   };
 
   return Response.json(responseBody, {
-    headers: CORS_HEADERS,
+    headers: ACTIONS_CORS_HEADERS,
   });
 }
 
