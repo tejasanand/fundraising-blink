@@ -120,10 +120,13 @@ export async function GET(request: Request) {
 
   if (blinkError) {
     console.error('Error fetching blink data:', blinkError);
-    return new Response(JSON.stringify({ error: 'Error fetching blink data' }), {
-      status: 500,
-      headers: CORS_HEADERS,
-    });
+    return new Response(
+      JSON.stringify({ error: 'Error fetching blink data' }),
+      {
+        status: 500,
+        headers: CORS_HEADERS,
+      }
+    );
   }
 
   const { data: donations, error: donationsError } = await supabase
@@ -152,7 +155,9 @@ export async function GET(request: Request) {
 
   const responseBody: ActionGetResponse = {
     icon: blinkData.image_url,
-    description: `Highest contributor - ${highestAmountBy}: ${highestAmount} | Latest - ${latestDonation?.display_name || 'Anonymous'}: ${latestDonation?.amount || 0}`,
+    description: `Highest contributor - ${highestAmountBy}: ${highestAmount} | Latest - ${
+      latestDonation?.display_name || 'Anonymous'
+    }: ${latestDonation?.amount || 0}`,
     title: blinkData.title,
     label: 'Donate SOL',
     links: {
@@ -180,12 +185,14 @@ export async function GET(request: Request) {
   });
 }
 
-export async function OPTIONS(request: Request) {
-  return new Response(null, {
-    status: 204,
-    headers: CORS_HEADERS,
-  });
-}
+export const OPTIONS = GET;
+
+// export async function OPTIONS(request: Request) {
+//   return new Response(null, {
+//     status: 204,
+//     headers: CORS_HEADERS,
+//   });
+// }
 
 export async function POST(request: Request) {
   try {
@@ -199,7 +206,11 @@ export async function POST(request: Request) {
     console.log('Received POST request:', { txAmount, uniqueId, userPubkey });
 
     if (!userPubkey || !txAmount || !uniqueId) {
-      console.error('Missing required fields:', { userPubkey, txAmount, uniqueId });
+      console.error('Missing required fields:', {
+        userPubkey,
+        txAmount,
+        uniqueId,
+      });
       return new Response(
         JSON.stringify({
           message: 'Missing required fields: account, amount, or uniqueid',
@@ -225,10 +236,13 @@ export async function POST(request: Request) {
 
     if (blinkError) {
       console.error('Error fetching blink data:', blinkError);
-      return new Response(JSON.stringify({ error: 'Error fetching blink data' }), {
-        status: 500,
-        headers: CORS_HEADERS,
-      });
+      return new Response(
+        JSON.stringify({ error: 'Error fetching blink data' }),
+        {
+          status: 500,
+          headers: CORS_HEADERS,
+        }
+      );
     }
 
     if (!blinkData) {
@@ -266,18 +280,16 @@ export async function POST(request: Request) {
 
     console.log('Transaction created successfully');
 
-    const { error: insertError } = await supabase
-      .from(tableName)
-      .insert([
-        {
-          amount: Number(txAmount),
-          display_name: displayName,
-          image_url: blinkData.image_url,
-          title: blinkData.title,
-          destination_wallet: blinkData.destination_wallet,
-          campaign_id: blinkData.campaign_id
-        },
-      ]);
+    const { error: insertError } = await supabase.from(tableName).insert([
+      {
+        amount: Number(txAmount),
+        display_name: displayName,
+        image_url: blinkData.image_url,
+        title: blinkData.title,
+        destination_wallet: blinkData.destination_wallet,
+        campaign_id: blinkData.campaign_id,
+      },
+    ]);
 
     if (insertError) {
       console.error('Error inserting new donation:', insertError);

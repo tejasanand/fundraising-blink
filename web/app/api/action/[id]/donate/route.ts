@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  ActionPostRequest,
-  ActionPostResponse,
-} from '@solana/actions';
+import { ActionPostRequest, ActionPostResponse } from '@solana/actions';
 import {
   clusterApiUrl,
   SystemProgram,
@@ -18,7 +15,10 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   console.log('Received POST request for blink ID:', params.id);
   try {
     const { data: blinkData, error: blinkError } = await supabase
@@ -29,18 +29,24 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     if (blinkError) {
       console.error('Error fetching blink data:', blinkError);
-      return NextResponse.json({ error: 'Error fetching blink data' }, {
-        status: 500,
-        headers: CORS_HEADERS,
-      });
+      return NextResponse.json(
+        { error: 'Error fetching blink data' },
+        {
+          status: 500,
+          headers: CORS_HEADERS,
+        }
+      );
     }
 
     if (!blinkData) {
       console.error('Blink not found for ID:', params.id);
-      return NextResponse.json({ error: 'Blink not found' }, {
-        status: 404,
-        headers: CORS_HEADERS,
-      });
+      return NextResponse.json(
+        { error: 'Blink not found' },
+        {
+          status: 404,
+          headers: CORS_HEADERS,
+        }
+      );
     }
 
     const requestBody: ActionPostRequest = await request.json();
@@ -50,12 +56,15 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const userPubkey = requestBody.account;
 
     if (!userPubkey || !txAmount) {
-      return NextResponse.json({
+      return NextResponse.json(
+        {
           message: 'Missing required fields: account or amount',
-      }, {
+        },
+        {
           status: 400,
           headers: CORS_HEADERS,
-      });
+        }
+      );
     }
     const displayName = (requestBody as any).data?.display_name || 'Anonymous';
 
@@ -90,16 +99,19 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           amount: Number(txAmount),
           display_name: displayName,
           image_url: blinkData.image_url,
-          destination_wallet: blinkData.destination_wallet
-        }
+          destination_wallet: blinkData.destination_wallet,
+        },
       ]);
 
     if (insertError) {
       console.error('Error inserting new row:', insertError);
-      return NextResponse.json({ error: 'Error inserting new row' }, {
-        status: 500,
-        headers: CORS_HEADERS,
-      });
+      return NextResponse.json(
+        { error: 'Error inserting new row' },
+        {
+          status: 500,
+          headers: CORS_HEADERS,
+        }
+      );
     }
 
     const response: ActionPostResponse = {
@@ -113,10 +125,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     });
   } catch (error) {
     console.error('Unexpected error in POST handler:', error);
-    return NextResponse.json({ error: 'An unexpected error occurred' }, {
-      status: 500,
-      headers: CORS_HEADERS,
-    });
+    return NextResponse.json(
+      { error: 'An unexpected error occurred' },
+      {
+        status: 500,
+        headers: CORS_HEADERS,
+      }
+    );
   }
 }
 
