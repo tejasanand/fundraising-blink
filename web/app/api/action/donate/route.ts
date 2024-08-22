@@ -185,14 +185,18 @@ export async function GET(request: Request) {
   });
 }
 
-export const OPTIONS = GET;
+// export const OPTIONS = GET;
 
-// export async function OPTIONS(request: Request) {
-//   return new Response(null, {
-//     status: 204,
-//     headers: CORS_HEADERS,
-//   });
-// }
+export async function OPTIONS(request: Request) {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      ...CORS_HEADERS,
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Credentials': 'true', // Allow credentials if needed
+    },
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -311,7 +315,10 @@ export async function POST(request: Request) {
 
     return new Response(JSON.stringify(response), {
       status: 200,
-      headers: CORS_HEADERS,
+      headers: {
+        ...CORS_HEADERS,
+        'Access-Control-Allow-Credentials': 'true', // Allow credentials if needed
+      },
     });
   } catch (error) {
     console.error('Unexpected error in POST handler:', error);
