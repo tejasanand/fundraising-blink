@@ -37,7 +37,7 @@ export default function GeneratorPage() {
       console.log('Blink created successfully with ID:', uniqueId);
 
       // Redirect to dial.to with the new campaign URL
-      const campaignUrl = encodeURIComponent(`http://cusp.live/api/action/donate?uniqueid=${uniqueId}`);
+      const campaignUrl = encodeURIComponent(`http://localhost:3000/api/action/donate?uniqueid=${uniqueId}`);
       const redirectUrl = `https://dial.to/developer?url=${campaignUrl}&cluster=mainnet`;
       router.push(redirectUrl);
     } catch (error) {

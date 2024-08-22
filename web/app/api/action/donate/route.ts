@@ -165,7 +165,7 @@ export async function GET(request: Request) {
       actions: [
         {
           label: 'Donate',
-          href: `/api/action/donate?amount={amount}&uniqueid=${uniqueId}`,
+          href: `/api/action/donate?amount={amount}&uniqueid=${uniqueId}&display_name={display_name}`,
           parameters: [
             {
               name: 'display_name',
@@ -198,7 +198,7 @@ export const OPTIONS = GET;
 
 export async function POST(request: Request) {
   try {
-    const requestBody: ActionPostRequest<string> & { data?: { display_name?: string } } = await request.json();
+    const requestBody: ActionPostRequest<string> = await request.json();
     const url = new URL(request.url);
 
     console.log('Full URL:', request.url);
@@ -208,7 +208,7 @@ export async function POST(request: Request) {
     const txAmount = url.searchParams.get('amount');
     const uniqueId = url.searchParams.get('uniqueid');
     const userPubkey = requestBody.account;
-    const displayName = requestBody.data?.display_name;
+    const displayName = url.searchParams.get('display_name') || 'Anonymous';
 
     console.log('Received POST request:', { txAmount, uniqueId, userPubkey, displayName });
 
