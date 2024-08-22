@@ -78,7 +78,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
   const responseBody: ActionGetResponse = {
     icon: typedBlinkData.image_url,
-    description: `Highest contributor - ${highestAmountBy}: ${highestAmount} | Latest - ${latestDonation?.display_name}: ${latestDonation?.amount || 0}`,
+    description: `Highest contributor - ${highestAmountBy}: ${highestAmount} | Latest - ${latestDonation?.display_name}: ${latestDonation?.amount || 0}\n\nMake your own fundraising campaign at https://cusp.live/generator`,
     title: typedBlinkData.title ?? 'Untitled Blink',
     label: 'Donate SOL',
     links: {
@@ -145,7 +145,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       );
     }
 
-    const requestBody: ActionPostRequest = await request.json();
+    const requestBody: ActionPostRequest<string> = await request.json();
     const url = new URL(request.url);
 
     const txAmount = url.searchParams.get('amount');
@@ -163,7 +163,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       );
     }
 
-    const displayName = (requestBody as any).data?.title;
+    const displayName = url.searchParams.get('display_name') || 'Anonymous';
 
     const user = new PublicKey(userPubkey);
     const connection = new Connection(clusterApiUrl('mainnet-beta'));
@@ -199,7 +199,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         {
           title: userPubkey,
           amount: Number(txAmount),
-          display_name: displayName || null,
+          display_name: displayName,
           image_url: blinkMetadata.image_url,
           destination_wallet: blinkMetadata.destination_wallet
         }

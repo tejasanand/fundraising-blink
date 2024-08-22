@@ -37,13 +37,17 @@ export default function GeneratorPage() {
       console.log('Blink created successfully with ID:', uniqueId);
 
       // Redirect to dial.to with the new campaign URL
-      const campaignUrl = encodeURIComponent(`http://cusp.live/api/action/donate?uniqueid=${uniqueId}`);
+      const campaignUrl = encodeURIComponent(`http://localhost:3000/api/action/donate?uniqueid=${uniqueId}`);
       const redirectUrl = `https://dial.to/developer?url=${campaignUrl}&cluster=mainnet`;
       router.push(redirectUrl);
     } catch (error) {
       console.error('Unexpected error:', error);
       // Display error to user
     }
+  };
+
+  const useDefaultImage = () => {
+    setImageUrl('https://ipfs.io/ipfs/Qmf8qEtZqHnqT3cjfR5Khi8dFmdabJXrTevQyPfQ7dBNqg');
   };
 
   return (
@@ -56,15 +60,24 @@ export default function GeneratorPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">Image/GIF URL</label>
-            <input
-              type="text"
-              id="imageUrl"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              required
-              placeholder="https://ipfs.io/ipfs/example123"
-            />
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                id="imageUrl"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                className="flex-grow p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                required
+                placeholder="https://imgur.com/example123"
+              />
+              <button
+                type="button"
+                onClick={useDefaultImage}
+                className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition duration-300"
+              >
+                Use Default
+              </button>
+            </div>
           </div>
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">Campaign Title</label>

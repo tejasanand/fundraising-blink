@@ -81,17 +81,17 @@ export async function GET(request: Request) {
 
     const responseBody: ActionGetResponse = {
       icon: 'https://ipfs.io/ipfs/QmNzuaVxi7zguTw5dxw39hLHjfVZ8YHd51RYtZYqRPxYXg',
-      description: `Highest contributor - ${highestAmountBy} : ${highestAmount} | Latest - ${latestAmountBy} : ${latestAmount}`,
+      description: `Highest contributor - ${highestAmountBy} : ${highestAmount} | Latest - ${latestAmountBy} : ${latestAmount}\n\nCreate your own fundraising campaign:\nhttps://cusp.live/generator`,
       title: 'Raise funds for developers on Solana',
       label: 'Stake SOL',
       links: {
         actions: [
           {
             label: 'Donate',
-            href: '/api/action/donate?amount={amount}',
+            href: '/api/action/donate?amount={amount}&display_name={display_name}',
             parameters: [
               {
-                name: 'title',
+                name: 'display_name',
                 label: 'Display Name',
               },
               {
@@ -158,7 +158,7 @@ export async function GET(request: Request) {
     icon: blinkData.image_url,
     description: `Highest contributor - ${highestAmountBy}: ${highestAmount} | Latest - ${
       latestDonation?.display_name || 'Anonymous'
-    }: ${latestDonation?.amount || 0}`,
+    }: ${latestDonation?.amount || 0}\n\nCreate your own fundraising campaign:\nhttps://cusp.live/generator`,
     title: blinkData.title,
     label: 'Donate SOL',
     links: {
