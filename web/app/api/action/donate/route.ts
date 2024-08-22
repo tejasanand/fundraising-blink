@@ -195,17 +195,22 @@ export const OPTIONS = GET;
 //   });
 // }
 
+
 export async function POST(request: Request) {
   try {
-    const requestBody: ActionPostRequest = await request.json();
+    const requestBody: ActionPostRequest<string> & { data?: { display_name?: string } } = await request.json();
     const url = new URL(request.url);
+
+    console.log('Full URL:', request.url);
+    console.log('URL parameters:', Object.fromEntries(url.searchParams.entries()));
+    console.log('Full request body:', JSON.stringify(requestBody, null, 2));
 
     const txAmount = url.searchParams.get('amount');
     const uniqueId = url.searchParams.get('uniqueid');
     const userPubkey = requestBody.account;
+    const displayName = requestBody.data?.display_name;
 
-    console.log('Full request body:', JSON.stringify(requestBody, null, 2));
-    console.log('Received POST request:', { txAmount, uniqueId, userPubkey });
+    console.log('Received POST request:', { txAmount, uniqueId, userPubkey, displayName });
 
     if (!userPubkey || !txAmount || !uniqueId) {
       console.error('Missing required fields:', {
@@ -223,18 +228,6 @@ export async function POST(request: Request) {
         }
       );
     }
-
-    // Try to extract display_name from multiple possible locations
-    let displayName = 'Anonymous';
-    if (typeof requestBody === 'object' && requestBody !== null) {
-      if ('input' in requestBody && typeof requestBody.input === 'object' && requestBody.input !== null) {
-        displayName = (requestBody.input as any).display_name || (requestBody.input as any).title || 'Anonymous';
-      } else if ('input' in requestBody && typeof requestBody.input === 'string') {
-        displayName = requestBody.input || 'Anonymous';
-      }
-    }
-    
-    console.log('Display Name:', displayName);
 
     const tableName = `blink_${uniqueId}`;
 
