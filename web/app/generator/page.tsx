@@ -55,7 +55,7 @@ export default function GeneratorPage() {
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">IPFS Hosted Image/GIF URL</label>
+            <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">Image/GIF URL</label>
             <input
               type="text"
               id="imageUrl"
