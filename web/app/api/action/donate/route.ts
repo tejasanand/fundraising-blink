@@ -204,6 +204,7 @@ export async function POST(request: Request) {
     const uniqueId = url.searchParams.get('uniqueid');
     const userPubkey = requestBody.account;
 
+    console.log('Full request body:', JSON.stringify(requestBody, null, 2));
     console.log('Received POST request:', { txAmount, uniqueId, userPubkey });
 
     if (!userPubkey || !txAmount || !uniqueId) {
@@ -223,7 +224,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const displayName = (requestBody as any).data?.display_name || 'Anonymous';
+    // Try to extract display_name from multiple possible locations
+    let displayName = 'Anonymous';
+    if (typeof requestBody === 'object' && requestBody !== null) {
+      if ('input' in requestBody && typeof requestBody.input === 'object' && requestBody.input !== null) {
+        displayName = (requestBody.input as any).display_name || (requestBody.input as any).title || 'Anonymous';
+      } else if ('input' in requestBody && typeof requestBody.input === 'string') {
+        displayName = requestBody.input || 'Anonymous';
+      }
+    }
+    
+    console.log('Display Name:', displayName);
 
     const tableName = `blink_${uniqueId}`;
 
