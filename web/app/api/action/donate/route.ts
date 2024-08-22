@@ -145,9 +145,11 @@ export async function GET(request: Request) {
 
   let highestAmount = 0;
   let highestAmountBy = '';
+  let totalContribution = 0;
   const latestDonation = donations[0];
 
   donations.forEach((donation: any) => {
+    totalContribution += donation.amount || 0;
     if (donation.amount > highestAmount) {
       highestAmount = donation.amount;
       highestAmountBy = donation.display_name || 'Anonymous';
@@ -158,7 +160,9 @@ export async function GET(request: Request) {
     icon: blinkData.image_url,
     description: `Highest contributor - ${highestAmountBy}: ${highestAmount} | Latest - ${
       latestDonation?.display_name || 'Anonymous'
-    }: ${latestDonation?.amount || 0}\n\nCreate your own fundraising campaign:\nhttps://cusp.live/generator`,
+    }: ${
+      latestDonation?.amount || 0
+    } | Total Raised - ${totalContribution} \n\nCreate your own fundraising campaign:\nhttps://cusp.live/generator`,
     title: blinkData.title,
     label: 'Donate SOL',
     links: {
@@ -195,14 +199,16 @@ export const OPTIONS = GET;
 //   });
 // }
 
-
 export async function POST(request: Request) {
   try {
     const requestBody: ActionPostRequest<string> = await request.json();
     const url = new URL(request.url);
 
     console.log('Full URL:', request.url);
-    console.log('URL parameters:', Object.fromEntries(url.searchParams.entries()));
+    console.log(
+      'URL parameters:',
+      Object.fromEntries(url.searchParams.entries())
+    );
     console.log('Full request body:', JSON.stringify(requestBody, null, 2));
 
     const txAmount = url.searchParams.get('amount');
@@ -210,7 +216,12 @@ export async function POST(request: Request) {
     const userPubkey = requestBody.account;
     const displayName = url.searchParams.get('display_name') || 'Anonymous';
 
-    console.log('Received POST request:', { txAmount, uniqueId, userPubkey, displayName });
+    console.log('Received POST request:', {
+      txAmount,
+      uniqueId,
+      userPubkey,
+      displayName,
+    });
 
     if (!userPubkey || !txAmount || !uniqueId) {
       console.error('Missing required fields:', {
